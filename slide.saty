@@ -1,0 +1,45 @@
+@require: class-slydifi/slydifi
+@require: algorithm/algorithm
+@require: algorithm/style/default
+@require: bibyfi/bibyfi
+@require: bibyfi/bibyfi-IEEETran
+@require: easytable/easytable
+@require: enumitem/enumitem
+@require: figbox/figbox
+@require: math
+@import: theme
+@import: fonts
+
+open SlydifiOverlay
+open EasyTableAlias
+open FigBox
+
+let-inline \arrow = {\text-color(green){${\Rightarrow}}}
+let-inline \arrow-listing lst =
+  {\listing?:(EnumitemAlias.text-label {\arrow;\ })(lst);}
+
+let slide-config = (|
+  SlydifiTheme.default-config with
+    centering = true;
+    show-progress-bar = true;
+    disable-overlay = false;
+    code-default-lang = CodeSyntax.ocaml;
+|)
+
+in
+
+document (|
+  font-set = Fonts.default-font-set;
+  show-note = false;
+|) '<
+
+  +set-config(slide-config);
+
+  +make-title(|
+    title     = {|タイトル|};
+    subtitle  = {|\SATySFi; Conf 2022|};
+    author    = {|pickoba|};
+    institute = {||};
+    date      = {|2022.09.24|};
+  |);
+>

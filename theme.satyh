@@ -1,0 +1,1095 @@
+%% theme.satyh
+%%
+%% SLyDIFi theme file.
+
+@require: gr
+@require: annot
+@require: railway/railway
+@require: base/color-ext
+@require: base/int
+@require: base/float
+@require: base/typeset/base
+@require: class-slydifi/slydifi
+@require: class-slydifi/footnote
+@require: code-printer/code-design
+@require: code-printer/code-printer
+@require: code-printer/code-syntax
+@require: code-printer/code-theme
+@require: colorbox/colorbox
+@require: enumitem/enumitem
+@require: fss/fss
+@require: fss/style
+
+let white = RGB(1., 1., 1.)
+
+let whiteBlue   = Color.of-css `#f9fdff`
+let lightBlue   = Color.of-css `#dbf2ff`
+let blue        = Color.of-css `#2d5ae0`
+let darkBlue    = Color.of-css `#143447`
+
+let whiteOrange = Color.of-css `#fffcf9`
+let lightOrange = Color.of-css `#ffeee0`
+let orange      = Color.of-css `#e33900`
+let darkOrange  = Color.of-css `#4f2604`
+
+let green       = Color.of-css `#009e73`
+let whiteGreen  = Color.of-css `#eefffa`
+let darkGreen   = Color.of-css `#144437`
+
+let purple      = Color.of-css `#9400d3`
+let whitePurple = Color.of-css `#faf0ff`
+let darkPurple  = Color.of-css `#441c58`
+
+type color-set = (|
+  main : color;
+  light : color;
+  dark : color;
+|)
+
+type slide-config = (|
+  %% font
+  font-normal : style list;
+  font-bold : style list;
+  font-code : style list;
+  font-slide-title : style list;
+  font-slide-subtitle : style list;
+  font-slide-author : style list;
+  font-slide-institute : style list;
+  font-slide-date : style list;
+  font-section-title : style list;
+  font-frame-title : style list;
+  font-pagenum : style list;
+  font-footnote : style list;
+  font-quote : style list;
+
+  %% color
+  % basic
+  color-bg : color;
+  color-link : color;
+  color-bg-code : color;
+  % frame template
+  color-pagenum : color;
+  color-indicator-total : color;
+  color-indicator-done : color;
+  % decoration
+  color-quote : color;
+  color-quote-line : color;
+  % theme
+  color-primary : color-set;
+  color-secondary : color-set;
+
+  %% code
+  code-font-size : length;
+  code-default-lang : CodePrinter.syntax;
+
+  %% length
+  length-frame-title-height : length;
+  length-frame-title-left-margin : length;
+  length-frame-title-bot-margin : length;
+  length-frame-body-top-margin : length;
+  length-indicator-line-thickness: length;
+  length-indicator-bar-height: length;
+  length-frame-footer-xmargin: length;
+  length-frame-footer-ymargin: length;
+
+  %% misc
+  centering : bool;
+  show-progress-bar : bool;
+  disable-overlay : bool;
+|)
+
+% settings for title slide
+type slide-title-config = (|
+  title : inline-text list;
+  subtitle : inline-text list;
+  author : inline-text list;
+  institute : inline-text list;
+  date : inline-text list;
+|)
+
+module SlydifiTheme: sig
+
+  val layout : frame-layout
+  val document : 'a -> block-text -> document
+    constraint 'a :: (|
+      font-set : fss-font-set;
+      show-note : bool;
+    |)
+
+% config
+  val font-metrics : length -> style
+  val default-config : slide-config
+  val config : slide-config SlydifiParam.t
+  direct +set-config : [slide-config] block-cmd
+  direct \set-config : [slide-config] inline-cmd
+  direct +with-config : [slide-config; block-text] block-cmd
+  direct \with-config : [slide-config; inline-text] inline-cmd
+
+% frames
+  val frame-master : slide-config -> unit Frame.frame
+  val frame-master-with-footer : slide-config -> unit Frame.frame
+  val frame-slide-title : slide-config -> slide-title-config Frame.frame
+  val frame-section-title : slide-config -> ((| title : inline-text list |)) Frame.frame
+  val frame-plain : slide-config -> ((| inner : block-text; margin-top : length; footer : bool |)) Frame.frame
+  val frame-normal : slide-config -> ((| title : inline-text; inner : block-text; footer : bool |)) Frame.frame
+
+% frame commands
+  direct +make-title : [slide-title-config] block-cmd
+  direct +section : [inline-text?; inline-text list; block-text] block-cmd
+  direct +section-noframe : [inline-text?; block-text] block-cmd
+  direct +frame : [int?; inline-text; block-text] block-cmd
+  direct +frame-plain : [int?; block-text] block-cmd
+  direct +frame-nofooter : [int?; inline-text; block-text] block-cmd
+  direct +namedframe : [string; inline-text; block-text] block-cmd
+  direct +againframe : [int?; string] block-cmd
+
+% decoration commands
+  direct \footnotesize : [(int -> bool)?; inline-text] inline-cmd
+  direct \small : [(int -> bool)?; inline-text] inline-cmd
+  direct \large : [(int -> bool)?; inline-text] inline-cmd
+  direct \Large : [(int -> bool)?; inline-text] inline-cmd
+  direct \LARGE : [(int -> bool)?; inline-text] inline-cmd
+  direct \emph : [(int -> bool)?; inline-text] inline-cmd
+  direct \alert : [(int -> bool)?; inline-text] inline-cmd
+  direct \textbf : [(int -> bool)?; inline-text] inline-cmd
+  direct \link : [inline-text?; string] inline-cmd
+  direct +quote : [block-text] block-cmd
+  direct +colorblock : [color-set?; inline-text; block-text] block-cmd
+  direct +colorbox : [color?; block-text] block-cmd
+
+% listing
+  val listing-itemfmt : context -> int list -> itemconfig
+  direct +listing : [(context -> int list -> itemconfig)?; itemize] block-cmd
+  direct \listing : [(context -> int list -> itemconfig)?; itemize] inline-cmd
+  val enumerate-itemfmt : context -> int list -> itemconfig
+  direct +enumerate : [(context -> int list -> itemconfig)?; itemize] block-cmd
+  direct \enumerate : [(context -> int list -> itemconfig)?; itemize] inline-cmd
+  direct +itemize : [(context -> int list -> itemconfig)?; block-text] block-cmd
+  direct +ditem: [inline-text; inline-text; block-text] block-cmd
+  direct +oitem : [(int -> bool); inline-text; block-text] block-cmd
+  val \label-circ : [] inline-cmd
+  val \label-minus : [] inline-cmd
+  val \label-box : [] inline-cmd
+
+% code
+  direct +code : [CodePrinter.syntax?; string] block-cmd
+  direct +code-file : [CodePrinter.syntax?; string] block-cmd
+  direct \code : [CodePrinter.syntax?; string] inline-cmd
+  direct \code-file : [CodePrinter.syntax?; string] inline-cmd
+
+% tikz commands
+  val tikz : (context -> graphics list) -> context -> inline-boxes
+  direct \tikz : [context -> graphics list] inline-cmd
+  direct +tikz : [context -> graphics list] block-cmd
+  direct +tikz-on-right : [context -> graphics list; block-text] block-cmd
+  direct +tikz-on-left : [context -> graphics list; block-text] block-cmd
+  val ghost-gr : (int -> bool) -> graphics list -> graphics list
+
+% misc
+  direct +centering : [inline-text] block-cmd
+  direct +twocolumn : [float?; block-text; block-text] block-cmd
+  direct +vskip : [length] block-cmd
+  val fig-slideshow : int -> FigBox.figbox list -> FigBox.figbox
+
+% footnote
+  direct \footnote : [inline-text] inline-cmd
+  direct \footnotetext : [string; inline-text] inline-cmd
+  direct \footnotemark : [string] inline-cmd
+
+% presenter note
+  direct +note : [(int -> bool)?; inline-text list] block-cmd
+  direct \next : [] inline-cmd
+
+end = struct
+
+% mutables
+  let section-name = SlydifiParam.make {}
+  let page-num = SlydifiParam.make 0
+  let presenter-notes = SlydifiParam.make []
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% layout
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  % TODO: configurable aspect
+  let layout = (|
+    paper-width = 254mm;
+    paper-height = 142.9mm;
+    text-width = 254mm -' 40pt;
+    text-height = 142.9mm -' 30pt;
+    text-horizontal-margin = 20pt;
+    text-vertical-margin = 10pt;
+  |)
+  let layout-with-note = (|
+    layout with
+      paper-width = layout#paper-width *' 2.;
+  |)
+  let xrel xfloat = layout#paper-width *' xfloat
+  let yrel yfloat = layout#paper-height *' yfloat
+  let rel xfloat yfloat = (xrel xfloat, yrel yfloat)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let paragraph-margin upper lower ectx =
+    let ctx = FssExtendedContext.get-context ectx in
+    let ctx = ctx |> set-paragraph-margin upper lower in
+    FssExtendedContext.set-context ctx ectx
+
+  let min-gap-of-lines l ectx =
+    let ctx = FssExtendedContext.get-context ectx in
+    let ctx = ctx |> set-min-gap-of-lines l in
+    FssExtendedContext.set-context ctx ectx
+
+  let leading l ectx =
+    let ctx = FssExtendedContext.get-context ectx in
+    let ctx = ctx |> set-leading l in
+    FssExtendedContext.set-context ctx ectx
+
+  let font-metrics fsize =
+    FssStyle.concat [
+      font-size fsize;
+      paragraph-margin (fsize *' 0.75) (fsize *' 0.75);
+      min-gap-of-lines 0pt;
+      leading (fsize *' 1.4);
+    ]
+
+  let default-config = (|
+    %% font
+    font-normal = [medium; font-metrics 16pt];
+    font-bold = [bold];
+    font-code = [medium];
+    font-slide-title = [bold; font-metrics 26pt];
+    font-slide-subtitle = [bold; font-metrics 20pt];
+    font-slide-author = [bold; font-metrics 18pt];
+    font-slide-institute = [medium; font-metrics 18pt];
+    font-slide-date = [medium; font-metrics 18pt];
+    font-section-title = [bold; font-metrics 28pt];
+    font-frame-title = [bold; font-metrics 24pt];
+    font-pagenum = [medium; font-metrics 12pt];
+    font-footnote = [medium; font-metrics 12pt; paragraph-margin 4pt 4pt];
+    font-quote = [medium; font-metrics 18pt];
+
+    %% color
+    % basic
+    color-bg = white;
+    color-link = Color.of-css `#2d539e`;
+    color-bg-code = Color.of-css `#dcdfe7`;
+    % frame template
+    color-pagenum = Color.of-css `#6b7089`;
+    color-indicator-total = Color.of-css `#e4e7ee`;
+    color-indicator-done = green;
+    % quotation
+    color-quote = (Color.of-css `#33374c`) |> color-inner ?:0.15 (Color.of-css `#e8e9ec`);
+    color-quote-line = (Color.of-css `#33374c`) |> color-inner ?:0.7 (Color.of-css `#e8e9ec`);
+    % theme
+    color-primary = (| main = green; light = whiteGreen; dark = darkGreen |);
+    color-secondary = (| main = purple; light = whitePurple; dark = darkGreen |);
+
+    %% code
+    code-font-size = 12pt;
+    code-default-lang = CodeSyntax.cpp;
+
+    %% length
+    length-frame-title-height = 36pt;
+    length-frame-title-left-margin = 20pt;
+    length-frame-title-bot-margin = 10pt;
+    length-frame-body-top-margin = 14pt;
+    length-indicator-line-thickness = 5pt;
+    length-indicator-bar-height = 30pt;
+    length-frame-footer-xmargin = 10pt;
+    length-frame-footer-ymargin = 8pt;
+
+    %% misc
+    centering = false;
+    show-progress-bar = true;
+    disable-overlay = false;
+  |)
+
+  let config = SlydifiParam.make default-config
+
+  let-block +set-config cfg = '< +SlydifiParam.set-param(config)(cfg); >
+  let-inline \set-config cfg = { \SlydifiParam.set-param(config)(cfg); }
+  let-block +with-config cfg bt = '< +SlydifiParam.with-param(config)(cfg)(bt); >
+  let-inline \with-config cfg it = { \SlydifiParam.with-param(config)(cfg)(it); }
+
+  let read-block-with-style ctx style bt =
+    read-block ctx '<+font-style(style)(bt);>
+
+  let read-inline-with-style ctx style it =
+    read-inline ctx {\font-style(style)(it);}
+
+% document
+
+  let-inline ctx \inline-code str =
+    let size = get-font-size ctx in
+    let ctx = ctx |> set-font-size (size *' 0.8) in
+    read-inline ctx {\ \inline-code(str);\ }
+
+  let document docconfig bt =
+    let config = SlydifiParam.get config in
+    let hookf _ _ =
+      let numpages = SlydifiParam.get page-num in
+      register-cross-reference `pagecount` (arabic numpages)
+    in
+    let init-ctx ctx =
+      ctx |> set-text-color config#color-primary#dark
+          |> set-code-text-command (command \inline-code)
+    in
+    let layout = if docconfig#show-note then layout-with-note else layout in
+    SlydifiScheme.document-scheme layout init-ctx hookf '<
+      +font-style[font-set docconfig#font-set](bt);
+    >
+
+  let gr-notes ctx =
+    let notes = SlydifiParam.get presenter-notes in
+    let ctx = ctx |> set-font-size (get-font-size ctx *' 1.3) in
+    let ib = notes
+      |> List.map (fun note -> read-block ctx '<+p{#note;}>)
+      |> List.fold-left (+++) block-nil
+      |> embed-block-breakable ctx
+    in
+    let font-size = get-font-size ctx in
+    let config = SlydifiParam.get config in
+    [
+      draw-text (
+        layout#paper-width +' layout#text-horizontal-margin,
+        layout#paper-height -' font-size -' layout#text-vertical-margin
+      ) ib
+    ]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% frames
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let frame-master config =
+    let f ctx () =
+      (block-nil, [
+        Gr.rectangle (0pt, 0pt) (layout#paper-width, layout#paper-height)
+          |> fill config#color-bg
+      ])
+    in
+    Frame.make layout f
+
+  let frame-master-with-footer config =
+    let f ctx () =
+      let (_, gr-frame-master) = frame-master config |> Frame.embed ctx () in
+
+      let pagenum = SlydifiParam.get page-num in
+      let total = get-cross-reference `pagecount` |> Option.from `1` in
+
+      let gr-page-number =
+        let it-pagenum = pagenum |> arabic |> embed-string in
+        let it-total = embed-string total in
+        let ctx-pagenum =
+          ctx |> set-text-color config#color-pagenum
+        in
+        let ib = read-inline-with-style ctx-pagenum config#font-pagenum {#it-pagenum;/#it-total;} in
+        let pos = (xrel 1.0 -' config#length-frame-footer-xmargin, config#length-frame-footer-ymargin) in
+        SlydifiGraphics.put-text (1., 0.) pos ib
+      in
+
+      let gr-section-title =
+        if (section-name |> SlydifiParam.has-changed) then
+          let it = section-name |> SlydifiParam.get in
+          let ctx-pagenum =
+            ctx |> set-text-color config#color-pagenum
+          in
+          let ib = read-inline-with-style ctx-pagenum config#font-pagenum it in
+          let pos = (xrel 0.5, config#length-frame-footer-ymargin) in
+          SlydifiGraphics.put-text (0.5, 0.) pos ib
+        else
+          []
+      in
+
+      let gr-progress-bar =
+        let progress =
+          let float-pagenum = float pagenum in
+          let float-total =
+            let int-total = Int.of-string total in
+            float (if int-total <= 1 then 2 else int-total)  % ゼロ割などの回避
+          in
+          (float-pagenum -. 1.) /. (float-total -. 1.)
+        in
+        let y = (layout#paper-height *' (1.0 -. progress)) in
+        let bar-done =
+          let vert-line = Rail.init |> Rail.push-line (0pt, config#length-indicator-bar-height) in
+          let side = Rail.(
+            circular-sector ?:(180.) (config#length-indicator-line-thickness *' 0.5)
+          )
+          in
+          Rail.(concat [
+            vert-line;
+            side;
+            vert-line |> reverse;
+            side ^ 180.
+          ] |> to-loop (layout#paper-width, y -' (config#length-indicator-bar-height *' 0.5))
+          )
+            |> fill config#color-indicator-done
+        in
+        let bar-total =
+          Gr.rectangle (layout#paper-width -' config#length-indicator-line-thickness, 0pt) (layout#paper-width, layout#paper-height)
+            |> fill config#color-indicator-total
+        in
+        [ bar-total; bar-done; ]
+      in
+
+      let grs = if config#show-progress-bar then
+        [gr-frame-master; gr-section-title; gr-page-number; gr-progress-bar]
+      else
+        [gr-frame-master; gr-section-title; gr-page-number]
+      in
+
+      (block-nil, grs |> List.concat)
+    in
+    Frame.make layout f
+
+  let frame-slide-title config =
+    let f ctx content =
+      let (_, gr-frame-master) = frame-master config |> Frame.embed ctx () in
+
+      let title-mgn = 14pt in
+      let author-mgn = 5pt in
+
+      let gr-background =
+        [
+          Gr.line (xrel 0.14, yrel 0.7) (xrel 0.95, yrel 0.7)
+            |> stroke 1pt config#color-primary#main;
+        ]
+      in
+
+      let gr-title =
+        let ctx = ctx |> set-text-color config#color-primary#main in
+        let iblst = content#title |> List.map (read-inline-with-style ctx config#font-slide-title) in
+        let pos = (xrel 0.95, yrel 0.7 +' title-mgn) in
+        SlydifiGraphics.put-texts
+          (| align = (1.0, 0.0); text-align = 1.0; leading = (get-font-size ctx *' 2.7) |)
+            pos iblst
+      in
+
+      let gr-subtitle =
+        let ctx = ctx |> set-text-color config#color-primary#main in
+        let iblst = content#subtitle |> List.map (read-inline-with-style ctx config#font-slide-subtitle) in
+        let pos = (xrel 0.95, yrel 0.7 -' title-mgn) in
+        SlydifiGraphics.put-texts
+          (| align = (1.0, 1.0); text-align = 1.0; leading = (get-font-size ctx *' 1.6) |)
+            pos iblst
+      in
+
+      let gr-author =
+        let ctx = ctx |> set-text-color config#color-primary#dark in
+        let iblst = content#author |> List.map (read-inline-with-style ctx config#font-slide-author) in
+        let pos = (xrel 0.95, yrel 0.45 +' author-mgn) in
+        SlydifiGraphics.put-texts
+          (| align = (1.0, 0.0); text-align = 1.0; leading = (get-font-size ctx *' 1.6) |)
+            pos iblst
+      in
+
+      let gr-institute =
+        let ctx = ctx |> set-text-color config#color-primary#dark in
+        let iblst = content#institute |> List.map (read-inline-with-style ctx config#font-slide-institute) in
+        let pos = (xrel 0.95, yrel 0.45 -' author-mgn) in
+        SlydifiGraphics.put-texts
+          (| align = (1.0, 1.0); text-align = 1.0; leading = (get-font-size ctx *' 1.6) |)
+            pos iblst
+      in
+
+      let gr-date =
+        let ctx = ctx |> set-text-color config#color-primary#dark in
+        let iblst = content#date |> List.map (read-inline-with-style ctx config#font-slide-date) in
+        let pos = (xrel 0.95, yrel 0.3) in
+        SlydifiGraphics.put-texts
+          (| align = (1.0, 1.0); text-align = 1.0; leading = (get-font-size ctx *' 1.6) |)
+            pos iblst
+      in
+
+      (block-nil, [gr-frame-master; gr-background; gr-title; gr-subtitle; gr-author; gr-institute; gr-date] |> List.concat)
+
+    in
+    Frame.make layout f
+
+  let frame-section-title config =
+    let f ctx content =
+      let (_, gr-frame-master) = frame-master config |> Frame.embed ctx () in
+
+      let title-mgn = 16pt in
+
+      let mirror-transform = linear-transform-graphics 1. 0.0 0. (0. -. 0.8) in
+
+      let gr-background = [
+        Gr.rectangle (xrel 0.05, yrel 0.3) (xrel 0.76, yrel 0.3)
+          |> stroke 0.5pt config#color-primary#main;
+      ]
+      in
+
+      let gr-title =
+        let grf clr =
+          let ctx = ctx |> set-text-color clr in
+          let iblst = content#title |> List.map (read-inline-with-style ctx config#font-section-title) in
+          SlydifiGraphics.put-texts
+            (| align = (0., 0.); text-align = 0.; leading = (get-font-size ctx *' 1.6) |)
+              (0pt, title-mgn) iblst
+        in
+        let gr-title = grf config#color-primary#main
+          |> List.map (shift-graphics (xrel 0.1, yrel 0.3))
+        in
+        gr-title
+      in
+
+      (block-nil, [gr-frame-master; gr-background; gr-title] |> List.concat)
+
+    in
+    Frame.make layout f
+
+  let frame-plain config =
+    let f ctx content =
+      let (_, gr) =
+        if content#footer then
+          frame-master-with-footer config |> Frame.embed ctx ()
+        else
+          frame-master config |> Frame.embed ctx ()
+      in
+      % プレゼンターノートをリセット
+      let () = presenter-notes |> SlydifiParam.set [] in
+
+      % 中身のブロックボックス列
+      let bb-inner =
+        let ctx = ctx |> set-text-color config#color-primary#dark in
+        let bb-inner = read-block-with-style ctx config#font-normal content#inner in
+        let height-inner = get-natural-length bb-inner in
+        let bb-blank skip =
+          line-break false false (ctx |> set-paragraph-margin 0pt skip) inline-fil
+        in
+        let skip = if config#centering then
+          content#margin-top +' (layout#text-height -' content#margin-top -' height-inner) *' 0.5
+        else
+          content#margin-top
+        in
+        bb-blank skip +++ bb-inner
+      in
+
+      (bb-inner, [gr; gr-notes ctx] |> List.concat)
+
+    in
+    Frame.make layout f
+
+  let frame-normal config =
+    let f ctx content =
+      let (bb, gr) =
+        frame-plain config |> Frame.embed ctx (|
+          inner = content#inner;
+          margin-top = config#length-frame-title-height +' config#length-frame-body-top-margin;
+          footer = content#footer;
+        |)
+      in
+
+      let title-ymin = layout#paper-height -' config#length-frame-title-height in
+
+      let gr-separator =
+        let xleft = config#length-frame-title-left-margin in
+        let xright = layout#paper-width -' config#length-frame-title-left-margin in
+        let y = title-ymin -' config#length-frame-title-bot-margin in
+        [Gr.line (xleft, y) (xright, y) |> stroke 1pt config#color-primary#main]
+      in
+
+      % タイトルのブロックボックス列
+      let gr-title =
+        let ctx-title = ctx |> set-text-color config#color-primary#main in
+        let ib-title = read-inline-with-style ctx-title config#font-frame-title content#title in
+        [draw-text (config#length-frame-title-left-margin, title-ymin) ib-title]
+      in
+
+      (bb, [gr; gr-separator; gr-title] |> List.concat)
+
+    in
+    Frame.make layout f
+
+% frame commands
+
+  let-block ctx +make-title content =
+    read-block ctx '<
+      +SlydifiScheme.genframe(frame-slide-title (SlydifiParam.get config))(1)(content);
+    >
+
+  let-block ctx +section ?:short-name title inner =
+    let bb-section = read-block ctx '<
+      +SlydifiScheme.genframe(frame-section-title (SlydifiParam.get config))(1)(|title = title;|);
+    >
+    in
+    let it-title =
+      let default = title |> List.fold-left (fun it1 it2 -> {#it1;#it2;}) {} in
+      short-name |> Option.from default
+    in
+    let () = section-name |> SlydifiParam.set it-title in
+    let bb-inner = read-block ctx inner in
+    let () = section-name |> SlydifiParam.discard in
+    bb-section +++ bb-inner
+
+  let-block ctx +section-noframe ?:short-name inner =
+    let it-title =
+      short-name |> Option.from {}
+    in
+    let () = section-name |> SlydifiParam.set it-title in
+    let bb-inner = read-block ctx inner in
+    let () = section-name |> SlydifiParam.discard in
+    bb-inner
+
+  let gen-frame ctx n-frame content frame-scheme =
+    let () = page-num |> SlydifiParam.set (SlydifiParam.get page-num + 1) in
+    let n-frame = n-frame |> Option.from 1 in
+    let config = SlydifiParam.get config in
+    let frame = frame-scheme config in
+    if config#disable-overlay then
+      SlydifiOverlay.specific-frame n-frame ctx content frame
+    else read-block ctx '<
+      +SlydifiScheme.genframe(frame)(n-frame)(content);
+    >
+
+  let-block ctx +frame ?:n-frame title inner =
+    frame-normal |> gen-frame ctx n-frame (|title = title; inner = inner; footer = true|)
+
+  let-block ctx +frame-nofooter ?:n-frame title inner =
+    frame-normal |> gen-frame ctx n-frame (|title = title; inner = inner; footer = false|)
+
+  let-block ctx +frame-plain ?:n-frame inner =
+    frame-plain |> gen-frame ctx n-frame (|inner = inner; margin-top = 0pt; footer = false|)
+
+  let-block ctx +namedframe name title inner =
+    let () = page-num |> SlydifiParam.set (SlydifiParam.get page-num + 1) in
+    read-block ctx '<
+      +SlydifiScheme.namedframe(frame-normal (SlydifiParam.get config))(name)(|title = title; inner = inner; footer = true|);
+    >
+
+  let-block ctx +againframe ?:lyr name =
+    let () = page-num |> SlydifiParam.set (SlydifiParam.get page-num + 1) in
+    match lyr with
+    | Some(lyr) -> read-block ctx '<
+      +SlydifiScheme.againframe?:(lyr)(name);
+    >
+    | None -> read-block ctx '<
+      +SlydifiScheme.againframe(name);
+    >
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% decoration commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% change font type
+
+  let overlay-text style dcf it ctx =
+    let dcf = Option.from (fun _ -> true) dcf in
+    SlydifiOverlay.select-from-two
+      dcf
+      (read-inline-with-style ctx style it)
+      (read-inline ctx it)
+
+  let-inline ctx \textbf ?:dcf it =
+    let config = SlydifiParam.get config in
+    SlydifiOverlay.select-from-two
+      (dcf |> Option.from (fun _ -> true))
+      (read-inline-with-style ctx config#font-bold it)
+      (read-inline ctx it)
+
+  let-inline ctx \emph ?:dcf it =
+    let config = SlydifiParam.get config in
+    SlydifiOverlay.select-from-two
+      (dcf |> Option.from (fun _ -> true))
+      (read-inline-with-style (ctx |> set-text-color config#color-primary#main) config#font-bold it)
+      (read-inline ctx it)
+
+  let-inline ctx \alert ?:dcf it =
+    let config = SlydifiParam.get config in
+    SlydifiOverlay.select-from-two
+      (dcf |> Option.from (fun _ -> true))
+      (read-inline-with-style (ctx |> set-text-color config#color-secondary#main) config#font-bold it)
+      (read-inline ctx it)
+
+% change font size
+
+  let overlay-font-size dcf mag it ctx =
+    let config = SlydifiParam.get config in
+    SlydifiOverlay.select-from-two
+      (dcf |> Option.from (fun _ -> true))
+      (read-inline-with-style ctx [with-font-size (fun s -> s *' mag)] it)
+      (read-inline ctx it)
+
+  let-inline ctx \footnotesize ?:dcf it =
+    overlay-font-size dcf 0.8 it ctx
+
+  let-inline ctx \small ?:dcf it =
+    overlay-font-size dcf 0.9 it ctx
+
+  let-inline ctx \large ?:dcf it =
+    overlay-font-size dcf 1.2 it ctx
+
+  let-inline ctx \Large ?:dcf it =
+    overlay-font-size dcf 1.44 it ctx
+
+  let-inline ctx \LARGE ?:dcf it =
+    overlay-font-size dcf 1.728 it ctx
+
+% link
+
+  let-inline ctx \link ?:text url =
+    let config = SlydifiParam.get config in
+    match text with
+    | Some(text) ->
+        let ctx = ctx |> set-text-color config#color-link in
+        read-inline ctx {\href(url)(text);}
+    | None ->
+        let text = embed-string url in
+        let ctx = ctx |> set-text-color config#color-link in
+        read-inline-with-style ctx config#font-code {\href(url)(text);}
+
+% quote
+
+  let-block ctx +quote bt =
+    let config = SlydifiParam.get config in
+    let deco (x, y) w h d =
+      [
+        fill config#color-quote-line (Gr.rectangle (x, y) (x +' 4pt, y +' h))
+      ]
+    in
+    block-frame-breakable ctx (15pt, 0pt, 10pt, 10pt)
+      (deco, deco, deco, deco)
+        (fun ctx -> (
+          let ctx2 = ctx |> set-text-color config#color-quote in
+          (read-block-with-style ctx2 config#font-quote bt)
+        ))
+
+% colorblock / colorbox
+
+  let-block ctx +colorblock ?:color-set title bt =
+    let config = SlydifiParam.get config in
+    let color-set = color-set |> Option.from config#color-primary in
+    read-block ctx '<
+      +Colorbox.colorbox(Colorbox.([
+        fonttitle [bold];
+        left 16pt; right 16pt; top 16pt; bottom 16pt;
+        boxrule 1.5pt;
+        lefttitle 12pt; righttitle 12pt; toptitle 4pt; bottomtitle 4pt;
+        colframe color-set#main;
+        colback color-set#light;
+      ]))?:(title)(bt);
+    >
+
+  let-block ctx +colorbox ?:bg-color bt =
+    let config = SlydifiParam.get config in
+    let bg-color = bg-color |> Option.from config#color-primary#main in
+    let ctx = ctx |> set-text-color white in
+    read-block ctx '<
+      +Colorbox.colorbox(Colorbox.([
+        left 7pt; right 7pt; top 14pt; bottom 14pt;
+        boxrule 0pt;
+        colback bg-color;
+      ]))(bt);
+    >
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% listing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% labels
+
+  let-inline ctx \label-circ =
+    let config = SlydifiParam.get config in
+    let fsize = get-font-size ctx in
+    let path (x, y) =
+      let cx = x +' fsize *' 0.5 in
+      let cy = y +' fsize *' 0.3 in
+      let r = fsize *' 0.25 in
+      Gr.circle (cx, cy) r
+    in
+    let gr (x, y) = [fill config#color-primary#main (path (x, y))] in
+    inline-graphics 24pt 8pt 0pt gr
+
+  let-inline ctx \label-minus =
+    let config = SlydifiParam.get config in
+    let fsize = get-font-size ctx in
+    let path (x, y) =
+      let cy = y +' fsize *' 0.3 in
+      Gr.line (x +' fsize *' 0.4, cy) (x +' fsize *' 0.9, cy)
+    in
+    let gr (x, y) = [stroke 1.5pt config#color-primary#main (path (x, y))] in
+    inline-graphics 24pt 8pt 0pt gr
+
+  let-inline ctx \label-box =
+    let config = SlydifiParam.get config in
+    let fsize = get-font-size ctx in
+    let path (x, y) =
+      let cx = x +' fsize *' 0.7 in
+      let cy = y +' fsize *' 0.3 in
+      let r = fsize *' 0.3 in
+      start-path (cx -' r, cy -' r)
+      |> line-to (cx +' r, cy -' r)
+      |> line-to (cx +' r, cy +' r)
+      |> line-to (cx -' r, cy +' r)
+      |> close-with-line
+    in
+    let gr (x, y) = [stroke 1.5pt config#color-primary#main (path (x, y))] in
+    inline-graphics 24pt 8pt 0pt gr
+
+% utils
+
+  let-rec power-float-int r m =
+    match m with
+    | 0 -> 1.
+    | _ -> (power-float-int r (m - 1)) *. r
+
+  let itemize-context-body ctx depth ctxorig _ =
+    let fsize =
+      let config = SlydifiParam.get config in
+      Fss.with-font-style ctx config#font-normal get-font-size
+    in
+    let shrink-ratio =
+      0.95 |> Float.pow (float (depth - 1))
+        |> Float.max 0.85
+        |> Float.min 1.0
+    in
+    Fss.with-font-style ctxorig [font-metrics (fsize *' shrink-ratio)] (fun ctx -> ctx)
+
+% listing
+
+  let listing-itemfmt ctx idxlst =
+    let depth = List.length idxlst in
+    let context-body = itemize-context-body ctx depth in
+    let fmt =
+      {|\label-circ;|\label-minus;|\label-box;|}
+        |> List.map EnumitemAlias.text-label |> EnumitemAlias.with-depth
+        |> EnumitemFormat.set-context-body context-body
+    in
+    fmt ctx idxlst
+
+  let-block ctx +listing ?:itemfmt item =
+    let itemfmt = itemfmt |> Option.from listing-itemfmt in
+    read-block ctx '< +listing?:(itemfmt)(item); >
+
+  let-inline ctx \listing ?:itemfmt item =
+    let itemfmt = itemfmt |> Option.from listing-itemfmt in
+    read-inline ctx {\EnumitemAlias.listing?:(itemfmt)(item);}
+
+% enumerate
+
+  let enumerate-itemfmt ctx idxlst =
+    let depth = List.length idxlst in
+    let context-body = itemize-context-body ctx depth in
+    let str-nums =
+      idxlst |> List.reverse
+             |> List.map (fun idx -> arabic idx ^ `.`)
+             |> List.fold-left (^) ` `
+    in
+    let it-num = {\emph(embed-string str-nums);\ } in
+    let fmt =
+      EnumitemAlias.text-label it-num
+        |> EnumitemFormat.set-context-body context-body
+    in
+    fmt ctx idxlst
+
+  let-block ctx +enumerate ?:itemfmt item =
+    let itemfmt = itemfmt |> Option.from enumerate-itemfmt in
+    read-block ctx '< +enumerate?:(itemfmt)(item); >
+
+  let-inline ctx \enumerate ?:itemfmt item =
+    let itemfmt = itemfmt |> Option.from enumerate-itemfmt in
+    read-inline ctx {\EnumitemAlias.enumerate?:(itemfmt)(item);}
+
+% misc
+
+  let-block ctx +itemize ?:itemfmt bt =
+    let itemfmt = itemfmt |> Option.from listing-itemfmt in
+    read-block ctx '< +itemize(itemfmt)(bt); >
+
+  let-block +ditem dt it-dd bt-dd =
+    '<
+      +EnumitemAlias.ditem?:(fun it -> {\emph{#it;}})(dt)(it-dd)(bt-dd);
+    >
+
+  let-block +oitem dcf it bt =
+    '< +phantom(dcf)< +item(it)(bt); > >
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% code
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let code-theme config = CodePrinter.make-theme (|
+    backcolor  = white;
+    basic      = fun ctx -> ctx
+                   |> set-font-size config#code-font-size
+                   |> set-paragraph-margin 2pt 2pt
+                   |> set-text-color config#color-primary#dark;
+    comment    = set-text-color config#color-secondary#main;
+    string     = set-text-color (Color.of-css `#4A280C`);
+    keyword    = set-text-color config#color-primary#main;
+    identifier = set-text-color config#color-primary#dark;
+    others     = [];
+  |)
+
+  let code-config config lang =
+    let lang = lang |> Option.from config#code-default-lang in
+    let theme = code-theme config in
+    CodePrinter.make-config lang theme
+    % remove line number
+    |> CodePrinter.set-number-fun CodeDesign.number-fun-null
+    % remove all decorations
+    |> CodePrinter.set-block-vdeco-set (fun _ -> VDecoSet.empty)
+    % remove padding
+    |> CodePrinter.set-block-paddings (0pt,0pt,0pt,0pt)
+  
+  let-block ctx +code ?:lang str =
+    let config = SlydifiParam.get config in
+    read-block ctx '<+code-printer?:(code-config config lang)(str);>
+
+  let-block ctx +code-file ?:lang filename =
+    let config = SlydifiParam.get config in
+    read-block ctx '<+file-printer?:(code-config config lang)(filename);>
+
+  let-inline ctx \code ?:lang str =
+    let config = SlydifiParam.get config in
+    read-inline ctx {\code-printer?:(code-config config lang)(str);}
+
+  let-inline ctx \code-file ?:lang filename =
+    let config = SlydifiParam.get config in
+    read-inline ctx {\file-printer?:(code-config config lang)(filename);}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% tikz
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let tikz grlst ctx =
+    let merge-bbox ((al, ab), (ar, at)) ((bl, bb), (br, bt)) =
+      (
+        ((length-min al bl), (length-min ab bb)),
+        ((length-max ar br), (length-max at bt))
+      )
+    in
+    let grlst = grlst ctx in
+    let ((l, b), (r, t)) =
+      grlst |> List.map get-graphics-bbox
+            |> List.fold-left merge-bbox ((10000pt, 10000pt), (-10000pt, -10000pt))
+    in
+    let (w, h) = (r -' l, t -' b) in
+    let grlst = grlst |> List.map (shift-graphics (0pt -' l, 0pt -' b)) in
+    inline-graphics w h 0pt (fun (x, y) -> grlst |> List.map (shift-graphics (x, y)))
+
+  let-inline ctx \tikz grlst =
+    tikz grlst ctx
+
+  let-block ctx +tikz grlst =
+    read-block ctx '<
+      +fig-center(FigBox.rawbox (tikz grlst));
+    >
+
+  let-block ctx +tikz-on-right grlst bt =
+    read-block ctx '<
+      +fig-on-right(FigBox.rawbox (tikz grlst))(bt);
+    >
+
+  let-block ctx +tikz-on-left grlst bt =
+    read-block ctx '<
+      +fig-on-left(FigBox.rawbox (tikz grlst))(bt);
+    >
+
+  let ghost-gr dcf grlst =
+    if dcf (SlydifiParam.get SlydifiOverlay.layer) then
+      grlst
+    else
+      []
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% misc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let-block ctx +centering it =
+    line-break true true ctx (inline-fil ++ read-inline ctx it ++ inline-fil)
+
+  let-block ctx +twocolumn ?:ratio left-block right-block =
+    let ratio = ratio |> Option.from 0.5 in
+    let margin = (get-font-size ctx) *' 1.0 in
+    let content-width = get-text-width ctx -' margin in
+    let left-column-width = content-width *' ratio in
+    let right-column-width = content-width *' (1.0 -. ratio) in
+    let config = SlydifiParam.get config in
+    let align = if config#centering then 0.5 else 1.0 in
+    read-block ctx '<
+      +fig-center(FigBox.hconcat ?:align [
+        FigBox.textblock left-column-width left-block;
+        FigBox.gap margin;
+        FigBox.textblock right-column-width right-block;
+      ]);
+    >
+
+  let-block ctx +vskip l = block-skip l
+
+  let fig-slideshow from figlst =
+    let layer = SlydifiParam.get SlydifiOverlay.layer in
+    let index = Int.min (Int.max (layer - from) 0) (List.length figlst - 1) in
+    List.nth index figlst |> Option.from (FigBox.dummy-box 100pt 100pt)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% footnote
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let-inline ctx \footnotetext ref-label it =
+    let config = SlydifiParam.get config in
+    let bbf num =
+      let it-num = embed-string (arabic num) in
+      line-break false false ctx (read-inline-with-style ctx config#font-footnote {#it-num; #it;} ++ inline-fil)
+    in
+      FootnoteScheme.main ctx (Some(ref-label)) (fun _ -> inline-nil) bbf
+
+  let-inline ctx \footnotemark ref-label =
+    let size = get-font-size ctx in
+    let ctx =
+      ctx |> set-font-size (size *' 0.75)
+          |> set-manual-rising (size *' 0.25)
+    in
+    let ctx =
+      ctx |> set-font-size (size *' 0.75)
+          |> set-manual-rising (size *' 0.25)
+    in
+    match FootnoteScheme.get-footnote-num ref-label with
+    | Some(n) ->
+      let it-num = embed-string n in
+      read-inline ctx {\*#it-num;}
+    | _ ->
+      read-inline ctx {\*?}
+
+  let-inline ctx \footnote it =
+    let config = SlydifiParam.get config in
+    let size = get-font-size ctx in
+    let ibf num =
+      let it-num = embed-string (arabic num) in
+      let ctx =
+        ctx |> set-font-size (size *' 0.75)
+            |> set-manual-rising (size *' 0.25)
+      in
+        read-inline ctx {\*#it-num;}
+    in
+    let bbf num =
+      let it-num = embed-string (arabic num) in
+      let ctx = Fss.with-font-style ctx config#font-footnote (fun ctx -> ctx) in
+      line-break false false ctx (read-inline ctx {#it-num; #it;} ++ inline-fil)
+    in
+      FootnoteScheme.main ctx None ibf bbf
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% presenter note
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  let-block ctx +note ?:dcf itlst =
+    let layer = SlydifiParam.get SlydifiOverlay.layer in
+    let dcf = dcf |> Option.from (fun _ -> true) in
+    let () = if dcf layer then
+      let new-notes = [SlydifiParam.get presenter-notes; itlst] |> List.concat in
+      presenter-notes |> SlydifiParam.set new-notes
+    else
+      ()
+    in
+      block-nil
+
+  let-inline \next = {\text-color(purple){\<NEXT\>}}
+
+end
+
+let document = SlydifiTheme.document
