@@ -9,21 +9,18 @@
 @require: math
 @import: theme
 @import: fonts
+@import: local
 
 open SlydifiOverlay
 open EasyTableAlias
 open FigBox
-
-let-inline \arrow = {\text-color(green){${\Rightarrow}}}
-let-inline \arrow-listing lst =
-  {\listing?:(EnumitemAlias.text-label {\arrow;\ })(lst);}
 
 let slide-config = (|
   SlydifiTheme.default-config with
     centering = true;
     show-progress-bar = true;
     disable-overlay = false;
-    code-default-lang = CodeSyntax.ocaml;
+    code-default-lang = CodeSyntax.satysfi;
 |)
 
 in
@@ -36,10 +33,257 @@ document (|
   +set-config(slide-config);
 
   +make-title(|
-    title     = {|タイトル|};
+    title     = {|\SATySFi; で卒論を書いた話|};
     subtitle  = {|\SATySFi; Conf 2022|};
     author    = {|pickoba|};
     institute = {||};
     date      = {|2022.09.24|};
   |);
+
+  +frame{自己紹介}<
+    +listing{
+      * pickoba（修士 1 年）
+      * 言語 : C\#, TypeScript, Scala
+      * \SATySFi;歴 : そろそろ 1 年
+      * 公開している \SATySFi; 関連のもの
+        ** VS Code 拡張 \link?:({\SATySFi; Workshop})(`https://github.com/pickoba/satysfi-workshop`);
+        ** 擬似コード組版ライブラリ \link?:({\SATySFi; Algorithm})(`https://github.com/pickoba/satysfi-algorithm`);
+        ** GitPod 向けテンプレート \link?:({\SATySFi; GitPod Template})(`https://github.com/pickoba/satysfi-gitpod-template`);
+    }
+
+    +vskip(20pt);
+
+    +centering{
+      \textbf{今日のテーマ} \SATySFi; で卒論を書いた話
+    }
+  >
+
+  +frame{\SATySFi; との出会い}<
+    +listing{
+      * \SATySFi; に出会ったのは、去年の 10 月
+      * 9 月にあった卒論の中間報告で \LaTeX; + Beamer を使い苦しんだ
+      * 静的型付き言語は昔から好きだった
+        ** もっと使いやすい組版言語はないのか \arrow; \SATySFi;
+    }
+
+    +listing{
+      * 第一印象は「括弧多いな、自然に書けるようになるのかな」
+        ** すぐに慣れ以後どっぷり浸かる
+    }
+
+    +note{
+      | \SATySFi; に出会ったのは〜当時は学部 4 年
+      | 私が所属する学科では 9 月に〜
+      | エラーメッセージがわかりにくいのもある、自分の直感に従わない世界と対話するのがしんどい
+      | ところで私は
+      | 第一印象としては \LaTeX; や Markdown の仲間だと思っていたのに
+    |}
+  >
+
+  +frame{とりあえず使ってみる}<
+    +listing{
+      * とりあえず研究室内の発表で \SATySFi; + \SLyDIFi; を使ってみた
+        ** 今使っているテーマは元々その時に作成したもの
+      * 執筆体験が良い
+        ** \LaTeX; のスライドと遜色ないものが作れる
+        ** ADT とパターンマッチで木構造の絵が描けることに感動
+    }
+
+    +p{
+      \arrow-listing{
+        * \textbf{卒論を \SATySFi; で書きたい}
+      }
+    }
+
+    +note{
+      | 何事も試してみることが大事、とりあえず〜
+      | クオリティ的に \LaTeX; と〜
+      | そのスライドの中に木構造の絵があって、しかもそれをアニメーションさせていた
+    |}
+  >
+
+  +frame{卒論を \SATySFi; で書くために}<
+    +listing{
+      * 学科のルール的には問題なさそう
+        ** PDF で出力できれば OK
+        ** ページ数以外の規定なし
+      * 既存の環境（VS Code）は長文を書くにはつらそう
+        ** 保存時にビルドを自動でしてほしい
+        ** monaqa さんの \link?:({Language Server})(`https://github.com/monaqa/satysfi-language-server`); を使いたい
+    }
+
+    +p{
+      \arrow-listing{
+        * \SATySFi; Workshop の開発へ
+      }
+    }
+
+    +note{
+      | 長文を書くのはつらそう、機能がもう少し欲しくなりそう
+      |
+      | じゃあ VS Code 拡張を自分の手で拡張してしまおう
+      | もとを辿れば \SATySFi; Workshop は私の卒論補助ツール
+    |}
+  >
+
+  +frame{\SATySFi; Workshop の開発}<
+    +p{
+      wraikny さんが作成されていた\link?:({既存の VS Code 拡張})(`https://marketplace.visualstudio.com/items?itemName=wraikny.wraikny-satysfi-extension`);をベースに、以下の機能追加・改善を実施\br;%
+      12 月に \SATySFi; Advent Calendar で公開
+      \listing{
+        * ビルド機能
+          ** ショートカットキーによるビルド・保存時のビルド
+        * 型チェック機能
+          ** 保存時やタイプ時に `satysfi` コマンドを呼び出し出力をパースして表示
+          ** 元からあったもののパフォーマンス等を改善
+        * Language Server のサポート
+          ** 単に受け口を作っただけ
+      }
+      その他 lint や format の自動化、テスト追加なども（詳細は \link?:({Qiita 記事})(`https://qiita.com/pickoba/items/efe59538253c4a6ea5f8`);参照）
+    }
+
+    +note{
+      | ということでいざ開発
+      | 元々 VS Code 拡張は wraikny さんが〜
+    |}
+  >
+
+  +frame{卒論を \SATySFi; で書く}<
+    +p{
+      卒論は実際に \SATySFi; Workshop を使って執筆した
+    }
+
+    +vskip(10pt);
+
+    +p{
+      使用させていただいたライブラリ
+      \listing{
+        * \align-by(240pt){\link?:({abenori/satysfi-class-jlreq})(`https://github.com/abenori/satysfi-class-jlreq`);}{... クラスファイル}
+        * \align-by(240pt){\link?:({monaqa/satysfi-easytable})(`https://github.com/monaqa/satysfi-easytable`);}{... 表組}
+        * \align-by(240pt){\link?:({monaqa/satysfi-enumitem})(`https://github.com/monaqa/satysfi-enumitem`);}{... 箇条書き}
+        * \align-by(240pt){\link?:({monaqa/satysfi-figbox})(`https://github.com/monaqa/satysfi-figbox`);}{... 画像挿入}
+        * \align-by(240pt){\link?:({namachan10777/BiByFi})(`https://github.com/namachan10777/BiByFi`);}{... 文献管理}
+        * \align-by(240pt){\link?:({puripuri2100/satysfi-code-printer})(`https://github.com/puripuri2100/satysfi-code-printer`);}{... ソースコード挿入}
+      }
+    }
+
+    +note{
+      | 卒論は実際に作成した VS Code 拡張を使って〜
+      |
+      | クラスファイルに abenori さんの jlreq、表組みに〜
+      | どれも \SATySFi; 的には有名所
+    |}
+  >
+
+  +frame{\SATySFi; で卒論を書いてよかったこと}<
+    +listing{
+      * エラーメッセージがわかりやすい
+        ** 静的型に守られているという安心感
+      * 「ちょっとした拡張」がやりやすい
+        ** その文書限りのコマンドを作る精神的ハードルが低い
+      * Language Server が快適
+      * Lua\LaTeX; よりコンパイルが速い
+    }
+  >
+
+  +frame{ちょっとしたコマンドの例}<
+    +p{
+      画像にキャプションを付けるコマンド
+    }
+
+    +twocolumn<
+      +p{
+        \code(```let with-caption caption figbox =
+  vconcat ?:align-center [
+    figbox;
+    gap 10pt;
+    textbox caption;
+  ]```);
+        のようなものを定義しておくと
+        \code(```+fig-center(
+  include-image 400pt `satysfi.jpg`
+  |> with-caption {\SATySFi; のロゴ}
+);```);
+        のように使える
+      }
+    ><
+      +fig-center(
+        include-image 300pt `./images/satysfi.jpg`
+        |> with-caption {\SATySFi; のロゴ}
+      );
+    >
+  >
+
+  +frame{\SATySFi; で卒論を書いて大変だったこと}<
+    +p{
+      \emph{問題1} ライブラリの種類が少ない
+      \arrow-listing{
+        * その場その場でライブラリを作りつつ執筆
+      }
+    }
+
+    +vskip(10pt);
+
+    +listing{
+      * figbox に自動で番号付けされるキャプションを付けたい \arrow; 前述の方法を拡張して作成
+      * 擬似コードを書きたい
+        ** その時点では enumitem を利用して作成
+           \code(```let-block +While cond inner =
+  '<
+    +EnumitemAlias.item({\bold{while}\ #cond; \bold{do}})(inner);
+    +EnumitemAlias.item({\bold{end while}})<>
+  >```);
+        ** 後に独立したライブラリとし、テーマの切り替えなど機能追加 \arrow; \link?:({satysfi-algorithm})(`https://github.com/pickoba/satysfi-algorithm`);
+    }
+  >
+
+  +frame{\SATySFi; で卒論を書いて大変だったこと}<
+    +p{
+      \emph{問題2} ビルドが終わらない
+    }
+
+    +vskip(10pt);
+
+    +p{
+      文章を書き進めていくに連れ、ビルドが `satysfi` コマンドの実行 1 回では終わらなくなってしまった
+      \arrow-listing{
+        * 浮動な画像（ページのヘッダに配置される画像）を多く挿入していたのが原因
+      }
+    }
+
+    +vskip(5pt);
+
+    +p{
+      一度安定すれば `satysfi-aux` ファイルを元に 1 回で組版できるが、文章の前方を編集するとやり直しになってしまうことも
+    }
+  >
+
+  +frame{まとめ}<
+    +listing{
+      * \SATySFi; を使うと分かりやすいエラーメッセージと Language Server による支援を存分に受けられる
+      * ライブラリが少ないのは大変だが、「困ったときは自分で作る」の精神があれば意外と乗り切れる
+      * （学部・学科の規定等があれば要確認）
+    }
+
+    +vskip(10pt);
+
+    +centering{
+      \textbf{卒論は \SATySFi; で書ける！}
+    }
+  >
+
+  +frame{\SATySFi; 関連の近況}<
+    +listing{
+      * \SATySFi; Workshop は鋭意開発中
+        ** そろそろまたリリースします（型チェック機能周辺の改善）
+        ** \SATySFi; 0.1.0 の対応も
+      * \SATySFi; Algorithm も 0.1.0 対応させたい
+        ** \LaTeX; の algorithmicx 向けのコードをテキストモードで吐けるようにしたい
+    }
+    % +listing{
+    %   * 研究室内に \SATySFi; が広まっている
+    %   * ぜひ使ってほしい
+    %     ** \SLyDIFi; はスタート地点としておすすめ
+    % }
+  >
 >

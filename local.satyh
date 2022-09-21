@@ -1,0 +1,25 @@
+@require: math
+@import: theme
+
+let-inline \arrow = {\text-color(green){${\Rightarrow}}}
+let-inline \arrow-listing lst =
+  {\listing?:(EnumitemAlias.text-label {\arrow;\ })(lst);}
+
+let-inline ctx \align-by width it1 it2 =
+  let ib1 = read-inline ctx it1 in
+  let ib2 = read-inline ctx it2 in
+  let (ib1-width, _, _) = get-natural-metrics ib1 in
+  ib1 ++ (inline-skip (width -' ib1-width)) ++ ib2
+
+let-mutable caption-counter <- 0
+
+let with-caption caption figbox =
+  let () = caption-counter <- !caption-counter + 1 in
+  let num = embed-string (arabic !caption-counter) in
+  FigBox.(
+    vconcat ?:align-center [
+      figbox;
+      gap 10pt;
+      textbox {\emph{Fig.#num;}\ #caption;};
+    ]
+  )
