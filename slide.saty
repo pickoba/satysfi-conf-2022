@@ -70,14 +70,6 @@ document (|
       * 第一印象は「括弧多いな、自然に書けるようになるのかな」
         ** すぐに慣れ以後どっぷり浸かる
     }
-
-    +note{
-      | \SATySFi; に出会ったのは〜当時は学部 4 年
-      | 私が所属する学科では 9 月に〜
-      | エラーメッセージがわかりにくいのもある、自分の直感に従わない世界と対話するのがしんどい
-      | ところで私は
-      | 第一印象としては \LaTeX; や Markdown の仲間だと思っていたのに
-    |}
   >
 
   +frame{とりあえず使ってみる}<
@@ -94,14 +86,6 @@ document (|
         * \textbf{卒論を \SATySFi; で書きたい}
       }
     }
-
-    +note{
-      | 出会ってしまったからには使ってみよう
-      | クオリティ的に \LaTeX; と〜
-      | そのスライドの中に木構造の絵があって、しかもそれをアニメーションさせていた
-      |
-      | こうして私は \SATySFi; の良さに気づいたわけですが、やはり卒論生として思うのは「これを卒論でも使いたい」ということ
-    |}
   >
 
   +frame{卒論を \SATySFi; で書くために}<
@@ -119,13 +103,6 @@ document (|
         * \SATySFi; Workshop の開発へ
       }
     }
-
-    +note{
-      | 長文を書くのはつらそう、機能がもう少し欲しくなりそう
-      |
-      | じゃあ VS Code 拡張を自分の手で拡張してしまおう
-      | もとを辿れば \SATySFi; Workshop は私の卒論補助ツール
-    |}
   >
 
   +frame{\SATySFi; Workshop の開発}<
@@ -143,11 +120,6 @@ document (|
       }
       その他 lint や format の自動化、テスト追加なども（詳細は \link?:({Qiita 記事})(`https://qiita.com/pickoba/items/efe59538253c4a6ea5f8`);参照）
     }
-
-    +note{
-      | ということでいざ開発
-      | 元々 VS Code 拡張は wraikny さんが〜
-    |}
   >
 
   +frame{卒論を \SATySFi; で書く}<
@@ -168,13 +140,6 @@ document (|
         * \align-by(240pt){\link?:({puripuri2100/satysfi-code-printer})(`https://github.com/puripuri2100/satysfi-code-printer`);}{... ソースコード挿入}
       }
     }
-
-    +note{
-      | 卒論は実際に作成した VS Code 拡張を使って〜
-      |
-      | クラスファイルに abenori さんの jlreq、表組みに〜
-      | どれも \SATySFi; 的には有名所
-    |}
   >
 
   +frame{\SATySFi; で卒論を書いてよかったこと}<
@@ -187,12 +152,6 @@ document (|
       * Language Server が快適
       * （手元の環境・設定では）Lua\LaTeX; よりコンパイルが速い
     }
-
-    +note{
-      | ここには「その文書限りの〜」と書いたが、この操作よくやるからコマンドとして定義したいという時に、まずはプリアンブル〜
-      |
-      | 自分で定義したコマンドも含めて補完が出るのが嬉しい
-    |}
   >
 
   +frame{ちょっとした拡張の例}<
@@ -244,12 +203,6 @@ document (|
   >```);
         ** 後に独立したライブラリとし、テーマの切り替えなど機能追加 \arrow; \link?:({satysfi-algorithm})(`https://github.com/pickoba/satysfi-algorithm`);
     }
-
-    +note{
-      | ライブラリをつくるというと大げさだが、先程のコマンドの例のように簡単に作れるものも多い
-      | enumitem は箇条書きの入れ子ができるので、それをコードのインデントに流用した
-      | ライブラリの方は少し複雑だが、卒論時点でやったことは比較的単純で、逆に単純なコードでできることが多いというのはお伝えしたい
-    |}
   >
 
   +frame{まとめ}<
@@ -264,10 +217,6 @@ document (|
     +centering{
       \textbf{卒論は \SATySFi; で書ける！}
     }
-
-    +note{
-      | これを聞いている方で今後卒論や修論を書く方は是非 \SATySFi; を使ってほしい
-    |}
   >
 
   +frame{\SATySFi; 関連の近況}<
